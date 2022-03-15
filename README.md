@@ -40,10 +40,6 @@ Sur.larva.Ha <- Sur.larva.Ha + facet_wrap(~ Encontro) +
        y = "Hydrotaea larval Survival (%)")
 ggsave("H. albuquerquei larval survival.pdf", units="in", width=5, height=4, dpi=300)
 
-#criar tabela apenas com encontros
-dados1 <-  filter(Tabela_Hydrotaea_vc_MuscaR ,Encontro=='H3M2'|
-                    Encontro=='H3M1'| Encontro=='H2M1'| Encontro=='H1M1')
-
 #Mount a collumn with species sci names
 Specie = c()
 for (i in 1:60)
@@ -81,15 +77,8 @@ Psurvival <- unlist(c(dados$NsurPupaMd/dados$NsurLarvaMd, dados$
 
 dados4 <- data.frame(Survival = Psurvival, Encounter=Encounter, Density=
                        Density, Species)
-rm(dados4)
+                       
 dados4$Survival=Psurvival
-
-#save file
-write.csv(dados4, "dados4.csv")
-#find directory
-getwd()
-#check data
-glimpse(dados4)
 
 Density<-data.frame(Density=c(dados$DensInMu, dados$DensInMu))
 
@@ -98,22 +87,6 @@ Encounter<-data.frame(Encounter =c(dados$Encontro, dados$Encontro))
 #adicionar ao df
 Specie <- dados(Specie)
 
-
-# what I usually do for regression outputs:
-library(stargazer)
-stargazer(model.surv.larv.Md, model2P, model3PHa, model2Ha ,model2.cp,  type = "html", out ="survival.html")
-
-stargazer( model.tax.des.Md.quas.poi.log, model1.rate.ha,  type = "html", out ="development.html")
-
-stargazer(anova.surv.md,  type = "html", out ="surv Md.html")
-
-# which yields a nice table with models side by side, including dependent variable names for each model; 
-# this one I'd export as .html to Word and process there
-#export it to wordfile
-capture.output(summary(anovalar.survMd),file="anova larval survival M. domestica.doc")
-out1<-xtable(anovalar.survMd)
-write.csv(out1, file="anova larval survival M. domestica", sep = ",")
-
 hnp(model2, xlab = 'Percentil da N(0,1)', ylab = 'Resíduos', main = 'Gráfico Normal de Probabilidades')
 
 PCT.p.Md <- as.data.frame (exp(cbind(OR = coef(model2), confint(model2))))
@@ -121,7 +94,6 @@ PCT.p.Md <- as.data.frame (exp(cbind(OR = coef(model2), confint(model2))))
 PCT.p.Md$interp = (PCT.p.Md$OR -1) *100
 
 #Larval survival
-
 paleta2 <- c("indianred", "darkorange", "gold", "royalblue")
 graph.1 <- ggplot(data=dados3, aes(x=as.factor(log(Density)), y=Survival/Density, fill=Species)) +
   geom_point(size=3, pch=21) +
@@ -148,15 +120,6 @@ graph.1 + scale_x_discrete(labels=c("100" = "1:1", "160" = "1:4",
 #H2M1: Encounter between 2º stage of predator and 1º of prey;
 #H3M1: Encounter between 3º stage of predator and 1º of prey;
 #H3M2: Encounter between 3º stage of predator and 2º of prey."
-
-#EDIT FACETWRAP LABELS
-hum_names <- as_labeller(
-  c( H1M1 = "A", H2M1 = "B",H3M1 = "C", 
-    H3M2 = "D"))
-#Add to the ggplot:
-  ggplot(dataframe, aes(x = Temperature.C, y = fit)) + 
-  geom_line() + 
-  facet_wrap(~Humidity.RH., nrow = 2, labeller = hum_names)
 
 #Pupal survival
 library(ggplot2)
@@ -243,9 +206,7 @@ ggplot(data=dados6, aes(x=log(Density), y=DevRate, fill=Species)) +
 ggsave("Pupal development rate.pdf", units="in", width=5, height=4, dpi=300)
 #Larval development rate (1/days) of Musca domestica
 
-#taxa de desenvolvimento de Hydrotaea
-
-
+# larval development rate of Hydrotaea
 #graph
 library(ggplot2)
 paleta2 <- c("indianred", "darkorange", "gold", "royalblue")
@@ -260,9 +221,7 @@ ggplot(data=dados, aes(x=log(Prop), y=taxa.larv.Ha, fill=Encontro)) +
   geom_smooth(method="glm", aes(color = Encontro),
               method.args = list(family = "quasipoisson"))
 
-#taxa de desenvolvimento pupal de Hydrotaea
-
-
+#pupal development rate of Hydrotaea
 
 #graph
 ggplot(data=dados, aes(x=log(Prop), y=taxa.p.Ha, fill=Encontro)) +
