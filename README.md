@@ -43,35 +43,3 @@ Tabela_Hydrotaea_vc_MuscaR$taxa.ciclo.Md <- as.numeric(Tabela_Hydrotaea_vc_Musca
 dados <-   filter(Tabela_Hydrotaea_vc_MuscaR ,Encontro=='H3M2'|
                     Encontro=='H3M1'| Encontro=='H2M1'| Encontro=='H1M1')
    
- #Plot da sobrevivencia pupal Md
-Sur.pup.Md <- ggplot(dados, aes(x=log(DensInMu), y=`%Surv.p.Md` , group=DensInMu))+ 
-  geom_boxplot(aes(fill=DensInMu))
-Sur.pup.Md <- Sur.pup.Md + facet_wrap(~ Encontro) +
-  labs(subtitle = ,
-       x = "Density",
-       y = "Musca pupal Survival (%)")
-ggsave("M. domestica pupal survival.pdf", units="in", width=5, height=4, dpi=300)
-
-#Plot da capacidade predatoria
-Pred.cap.Hyd <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=log(DensInMu), y= `Ndeath.larva.Md/N.Surv.Larv.Ha` , group=DensInMu))+ 
-  geom_boxplot(aes(fill=DensInMu))
-Pred.cap.Hyd <- Pred.cap.Hyd + facet_wrap(~ Encontro)
-
-#Plot da sobrevivencia pupal de H. albuquerquei
-Sur.pup.Ha <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y= `%SHaPupal`, group=DensInMu))+ 
-  geom_boxplot(aes(fill=DensInMu))
-Sur.pup.Ha <- Sur.pup.Ha + facet_wrap(~ Encontro) +
-  labs(subtitle = ,
-       x = "Density",
-       y = "Hydrotaea pupal Survival (%)")
-ggsave("H. albuquerquei pupal survival.pdf", units="in", width=5, height=4, dpi=300)
-
-#Plot da sobrevivencia larval de H. albuquerquei
-Sur.larva.Ha <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y=`%surv.larva.Ha`, group=DensInMu))+ 
-  geom_boxplot(aes(fill=DensInMu))
-Sur.larva.Ha <- Sur.larva.Ha + facet_wrap(~ Encontro) +
-  labs(subtitle = ,
-       x = "Density",
-       y = "Hydrotaea larval Survival (%)")
-ggsave("H. albuquerquei larval survival.pdf", units="in", width=5, height=4, dpi=300)
-
