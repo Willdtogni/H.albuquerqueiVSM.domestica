@@ -1,0 +1,272 @@
+#quasiPoisson pupal
+model.tax.p.Md.quas.poi.log <- glm(taxa.p.Md~log(DensInMu)*Encontro,
+                             family=quasipoisson, weights = DensInMu, data=dados)
+summary(model.tax.p.Md.quas.poi.log)
+anova.dev.p.Md <- anova(model.tax.p.Md.quas.poi.log, test = "F")
+
+#quasiPoisson larval
+model.tax.larv.Md.quas.poi.log <- glm(taxa.larv.Md~log(DensInMu)*Encontro,
+                                     family=quasipoisson,  data=dados)
+summary(model.tax.larv.Md.quas.poi.log)
+anova.dev.larv.Md <- anova(model.tax.larv.Md.quas.poi.log, test = "F")  
+
+library(stargazer)
+stargazer(anova.dev.larv.Md, type = "html", out ="devratemd.html")
+
+#quasiPoisson total 
+model.tax.tot.Md.quas.poi <- glm(taxa.ciclo.Md~log(DensInMu)*Encontro,
+                             family=quasipoisson, weights = DensInMu, data=dados)
+summary(model.tax.tot.Md.quas.poi)
+anova(model.tax.tot.Md.quas.poi, test="Chi")
+
+#Gamma
+model.tax.des.Md.gam <- glm(taxa.larv.Md~as.factor(Prop)*Encontro,
+                        family=Gamma, weights = DensInMu, data=dados)
+summary(model.tax.des.Md.gam)
+anova(model.tax.des.Md.gam)
+
+#criar tabela para comparação entre grupos
+#control1 + h1m1
+Sur.larv.Md.control1  <- Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "Control1", ]
+Sur.larv.h1m1.Md <-   Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "H1M1", ]
+Sur.larv.h1m1.Md <- bind_rows (Sur.larv.Md.control1 , Sur.larv.h1m1.Md)
+
+boxplot(Tabela_Hydrotaea_vc_MuscaR$time.ciclo.Md ~ Tabela_Hydrotaea_vc_MuscaR$DensInMu)
+#teste shapiro para taxa de desenvolvimento larval
+shapiro.test(Sur.larv.h1m1.Md$taxa.larv.Md)
+
+#teste de kruskal wallis 
+kruskal.test.surv.larv.h1m1.Md <- kruskal.test(taxa.larv.Md ~ DensInMu, data = Sur.larv.h1m1.Md)
+
+wilcox.test.dev.rate.h1m1 <- pairwise.wilcox.test(Sur.larv.h1m1.Md$taxa.larv.Md, Sur.larv.h1m1.Md$DensInMu,
+                     p.adjust.method = "BH")
+
+#teste anova para taxa de desenvolvimento larval
+anova.dev.rate.h1m1.Md <- aov(Sur.larv.h1m1.Md$taxa.larv.Md ~ Sur.larv.h1m1.Md$DensInMu)
+summary(anova.dev.rate.h1m1.Md)
+
+#teste tukey taxa de desenvolvimento larval
+TukeyHSD(anova.dev.rate.h1m1.Md)
+
+#teste shapiro para taxa de desenvolvimento pupal
+shapiro.test(Sur.larv.h1m1.Md$taxa.p.Md)
+
+#teste anova para taxa de desenvolvimento pupal
+anova.pup.rate.h1m1.Md <- aov(Sur.larv.h1m1.Md$taxa.p.Md ~ Sur.larv.h1m1.Md$DensInMu)
+summary(anova.pup.rate.h1m1.Md)
+
+#teste tukey taxa de desenvolvimento pupal
+TukeyHSD(anova.pup.rate.h1m1.Md)
+
+####RAnkeamento de valor p para verificar tendencia entre os grupos
+
+#control1 + h2m1
+Sur.larv.h2m1.Md <-   Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "H2M1", ]
+Sur.larv.h2m1.Md <- bind_rows (Sur.larv.Md.control1 , Sur.larv.h2m1.Md)
+
+boxplot(Sur.larv.h2m1.Md$taxa.larv.Md ~ Sur.larv.h2m1.Md$DensInMu)
+
+#teste shapiro para taxa de desenvolvimento larval
+shapiro.test(Sur.larv.h2m1.Md$taxa.larv.Md)
+
+#teste anova taxa de desenvolvimento larval
+anova.dev.rate.h2m1.Md <- aov(Sur.larv.h2m1.Md$taxa.larv.Md ~ Sur.larv.h2m1.Md$DensInMu)
+summary(anova.dev.rate.h2m1.Md)
+
+#teste tukey taxa de desenvolvimento larval
+TukeyHSD(anova.dev.rate.h2m1.Md)
+
+#teste shapiro para taxa de desenvolvimento pupal
+shapiro.test(Sur.larv.h2m1.Md$taxa.p.Md)
+
+#teste anova para taxa de desenvolvimento pupal
+anova.pup.rate.h2m1.Md <- aov(Sur.larv.h2m1.Md$taxa.p.Md ~ Sur.larv.h2m1.Md$DensInMu)
+summary(anova.pup.rate.h2m1.Md)
+
+#teste tukey taxa de desenvolvimento pupal
+TukeyHSD(anova.pup.rate.h2m1.Md)
+
+#control1 + h3m1
+Sur.larv.h3m1.Md <-   Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "H3M1", ]
+Sur.larv.h3m1.Md <- bind_rows (Sur.larv.Md.control1 , Sur.larv.h3m1.Md)
+
+plot(Sur.larv.h3m1.Md$taxa.larv.Md ~ Sur.larv.h3m1.Md$DensInMu)
+#teste shapiro para taxa de desenvolvimento larval
+shapiro.test(Sur.larv.h3m1.Md$taxa.larv.Md)
+
+#teste anova 
+anova.dev.rate.h3m1.Md <- aov(Sur.larv.h3m1.Md$taxa.larv.Md ~ Sur.larv.h3m1.Md$DensInMu)
+summary(anova.dev.rate.h3m1.Md)
+#teste tukey para verificar diferenças
+TukeyHSD(anova.dev.rate.h3m1.Md)
+
+#teste anova para capacidade predatória
+anova.cap.pred.h3m1.Md <- aov(Sur.larv.h3m1.Md$ `Ndeath.larva.Md/N.Surv.Larv.Ha` ~ Sur.larv.h3m1.Md$DensInMu)
+summary(anova.cap.pred.h3m1.Md)
+
+#teste tukey para capacidade predatória
+TukeyHSD(anova.cap.pred.h3m1.Md)
+
+#teste shapiro para taxa de desenvolvimento pupal
+shapiro.test(Sur.larv.h3m1.Md$taxa.p.Md)
+
+#teste anova para taxa de desenvolvimento pupal
+anova.pup.rate.h3m1.Md <- aov(Sur.larv.h3m1.Md$taxa.p.Md ~ Sur.larv.h3m1.Md$DensInMu)
+summary(anova.pup.rate.h3m1.Md)
+
+#teste tukey taxa de desenvolvimento pupal
+TukeyHSD(anova.pup.rate.h3m1.Md)
+
+#control2 + h3m2
+Sur.larv.Md.control2  <- Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "Control2", ]
+Sur.larv.h3m2.Md <-   Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "H3M2", ]
+Sur.larv.h3m2.Md <- bind_rows (Sur.larv.Md.control2 , Sur.larv.h3m2.Md)
+
+plot(Sur.larv.h3m2.Md$taxa.larv.Md ~ Sur.larv.h3m2.Md$DensInMu)
+
+#teste shapiro para taxa de desenvolvimento larval
+shapiro.test(Sur.larv.h3m2.Md$taxa.larv.Md)
+
+#teste anova 
+anova.de.rate.h3m2.Md <- aov(Sur.larv.h3m2.Md$taxa.larv.Md ~ Sur.larv.h3m2.Md$DensInMu)
+summary(anova.de.rate.h3m2.Md)
+
+#teste tukey para verificar diferenças
+TukeyHSD(anova.de.rate.h3m2.Md)
+
+#teste shapiro para taxa de desenvolvimento pupal
+shapiro.test(Sur.larv.h3m2.Md$taxa.p.Md)
+
+#teste de kruskal wallis 
+kruskal.test.surv.larv.h3m2.Md <- kruskal.test(taxa.p.Md ~ DensInMu, data = Sur.larv.h3m2.Md)
+
+#modelos com log desenvolvimento larval Ha
+model.tax.des.larv.Ha.norm.log <- glm(taxa.larv.Ha~log(DensInMu)*Encontro,
+                                   family=gaussian, weights = DensInMu, data=dados)
+summary(model.tax.des.larv.Ha.norm.log)
+anova(model.tax.des.larv.Ha.norm.log)
+
+#modelos com log desenvolvimento pupal Ha
+#normal
+model.tax.des.P.Ha.norm.log <- glm(taxa.p.Ha~log(DensInMu)*Encontro,
+                                 family=gaussian, weights = DensInMu, data=dados)
+summary(model.tax.des.P.Ha.norm.log)
+anova(model.tax.des.P.Ha.norm.log)
+
+
+#Plot da desenvolvimento pupal Ha
+Pred.des.p.Hyd <- ggplot(dados, aes(x=log(Prop), y= taxa.p.Ha , group=DensInMu))+ 
+  geom_boxplot(aes(fill=DensInMu))
+Pred.des.p.Hyd <- Pred.des.p.Hyd + facet_wrap(~ Encontro)
+
+#quasiPoisson larval
+model.tax.des.Ha.quas.poi.log <- glm(taxa.larv.Ha ~log(DensInMu)*Encontro,
+                                     family=quasipoisson,  data=dados)
+summary(model.tax.des.Ha.quas.poi.log)
+anova(model.tax.des.Ha.quas.poi.log, test = "F")
+
+#quasiPoisson pupal
+model.tax.p.Ha.quas.poi.log <- glm(taxa.p.Ha ~log(DensInMu)*Encontro,
+                                     family=quasipoisson, data=dados)
+summary(model.tax.p.Ha.quas.poi.log)
+anova(model.tax.p.Ha.quas.poi.log, test = "F")
+
+#quasiPoisson ciclo
+model.tax.tot.Md.quaspoi.log <- glm(taxa.ciclo.Ha~log(Prop)*Encontro,
+                                family=quasipoisson, weights = DensInMu, data=dados)
+summary(model.tax.tot.Md.quaspoi.log)
+anova(model.tax.tot.Md.quaspoi.log)
+
+#plot taxa de desenvolvimento larval Md
+tax.des.larv.Md <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y=taxa.larv.Md , group=DensInMu))+ 
+  geom_boxplot(aes(fill=DensInMu))
+tax.des.larv.Md <- tax.des.larv.Md + facet_wrap(~ Encontro)
+
+#plot taxa de desenvolvimento pupal Md
+tax.des.pup.Md <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y=taxa.p.Md , group=DensInMu))+ 
+  geom_boxplot(aes(fill=DensInMu))
+tax.des.pup.Md <- tax.des.pup.Md + facet_wrap(~ Encontro)
+
+#plot taxa de desenvolvimento do ciclo completo Md
+tax.des.cic.Md <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y=time.ciclo.Md , group=DensInMu))+ 
+  geom_boxplot(aes(fill=DensInMu))
+tax.des.cic.Md <- tax.des.cic.Md + facet_wrap(~ Encontro)
+
+#plot taxa de desenvolvimento larval Md
+time.des.larv.Md <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y=time.larv.Md , group=DensInMu))+ 
+  geom_boxplot(aes(fill=DensInMu))
+time.des.larv.Md <- time.des.larv.Md + facet_wrap(~ Encontro)
+
+#plot taxa de desenvolvimento pupal Md
+tax.des.pup.Md <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y=taxa.p.Md , group=DensInMu))+ 
+  geom_boxplot(aes(fill=DensInMu))
+tax.des.pup.Md <- tax.des.pup.Md + facet_wrap(~ Encontro)
+
+#plot taxa de desenvolvimento pupal Md
+tax.des.cic.Md <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y=taxa.ciclo.Md , group=DensInMu))+ 
+  geom_boxplot(aes(fill=DensInMu))
+tax.des.cic.Md <- tax.des.cic.Md + facet_wrap(~ Encontro)
+
+
+#Taxa de desenvolvimento larval MD
+
+# Controle 
+
+Tabela_Hydrotaea_vc_MuscaR<-Tabela_Hydrotaea_vc_MuscaR[(-64),]
+
+control <- Tabela_Hydrotaea_vc_MuscaR %>% filter(Encontro %like% 'Control')
+control
+
+# calculando a média das taxas
+mTaxDev.larv.Md <- Tabela_Hydrotaea_vc_MuscaR %>% group_by (Encontro) %>% 
+  summarise ( taxa_larval = mean(taxa.larv.Md, na.rm= TRUE))
+
+mTaxDev.pup.Md <- Tabela_Hydrotaea_vc_MuscaR  %>% group_by (Encontro) %>% 
+  summarise ( taxa_pupal = mean(taxa.p.Md, na.rm= TRUE))
+
+mTaxDev.Tot.Md <- Tabela_Hydrotaea_vc_MuscaR  %>% group_by (Encontro) %>% 
+  summarise ( taxa_ciclo = mean(taxa.ciclo.Md, na.rm= TRUE))
+
+# calculando a média dos tempos
+mTimeDev.larv.Md <- Tabela_Hydrotaea_vc_MuscaR %>% group_by (Encontro) %>% 
+  summarise ( tempo_larval = mean(time.larv.Md, na.rm= TRUE))
+
+mTimeDev.pup.Md <- Tabela_Hydrotaea_vc_MuscaR  %>% group_by (Encontro) %>% 
+  summarise ( tempo_pupal = mean(time.p.Md, na.rm= TRUE))
+
+mTimeDev.Tot.Md <- Tabela_Hydrotaea_vc_MuscaR  %>% group_by (Encontro) %>% 
+  summarise ( tempo_ciclo = mean(time.ciclo.Md, na.rm= TRUE))
+mTimeDev.Tot.Md 
+
+
+# realizando o plot da Taxa larval
+
+TaxDev.larv.Md  <- ggplot(mTaxDev.larv.Md ,aes(x=Encontro, y=taxa_larval, color = 
+                                        Encontro)) +geom_point()
+TaxDev.larv.Md
+
+# realizando o plot da Taxa Pupal
+TaxDev.pup.Md  <- ggplot(mTaxDev.pup.Md ,aes(x=Encontro, y=taxa_pupal, color = 
+                                                 Encontro)) +geom_point()
+TaxDev.pup.Md
+
+# realizando o plot da Taxa total
+TaxDev.Tot.Md  <- ggplot(mTaxDev.Tot.Md ,aes(x=Encontro, y=taxa_ciclo, color = 
+                                               Encontro)) +geom_point()
+TaxDev.Tot.Md
+
+# realizando o plot do tempo de desenvolvimento larval
+
+TimeDev.larv.Md  <- ggplot(mTimeDev.larv.Md ,aes(x=Encontro, y=tempo_larval, color = 
+                                                 Encontro)) +geom_point()
+TimeDev.larv.Md
+
+# realizando o plot do tempo de desenvolvimento Pupal
+TimeDev.pup.Md  <- ggplot(mTimeDev.pup.Md ,aes(x=Encontro, y=tempo_pupal, color = 
+                                               Encontro)) +geom_point()
+TimeDev.pup.Md
+
+# realizando o plot do tempo de desenvolvimento total
+TimeDev.Tot.Md  <- ggplot(mTimeDev.Tot.Md ,aes(x=Encontro, y=tempo_ciclo, color = 
+                                               Encontro)) +geom_point()
+TimeDev.Tot.Md
