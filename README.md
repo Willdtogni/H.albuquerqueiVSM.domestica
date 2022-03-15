@@ -1,86 +1,91 @@
-# H.albuquerqueiVSM.domestica
-Codes to data analysis 
-We test the following hypothesis: 
-(i) larval and pupal survival of M. domestica decreases as increases the density and stage of H. albuquerquei; 
-(ii) as well larval and pupal development rate accelerates and; 
-(iii) the predatory capacity increase as decreases the predator density and larval stage increases. 
-(iv) At the same time, if the predator is also a better competitor, we expect that their development time will tend to prolongate as conspecific larval 
-density increases. This delay should be caused primarily by energy costs related to predation activity.
-
-library(readxl)
-Tabela_Hydrotaea_vc_MuscaR <- read_excel("D:/Biblio mestrado/projeto/analises/Hydrotea vs Musca/Tabela  Hydrotaea vc MuscaR.xlsx")
-View(Tabela_Hydrotaea_vc_MuscaR)
-
-head(Tabela_Hydrotaea_vc_MuscaR)
 
 #criar tabela apenas com encontros
-dados <-   filter(Tabela_Hydrotaea_vc_MuscaR ,Encontro=='H3M2'|
+dados1 <-  filter(Tabela_Hydrotaea_vc_MuscaR ,Encontro=='H3M2'|
                     Encontro=='H3M1'| Encontro=='H2M1'| Encontro=='H1M1')
 
-library(dplyr)
-library(ggplot2)
-library(patchwork)
-library(tidyverse)
-library(hrbrthemes)
-library(viridis)
-library(car)
-library(DescTools)
-library(ggpubr)
-library(rstatix)
+#Mount a collumn with species sci names
+Specie = c()
+for (i in 1:60)
+  Specie[[i]] = "Musca domestica"
+for (i in 61:120)
+  Specie[[i]] = "Hydrotaea albuquerquei"
 
-# convertendo as coluna de densidade para fator
-Tabela_Hydrotaea_vc_MuscaR$DensInMu <- as.numeric(Tabela_Hydrotaea_vc_MuscaR$DensInMu )
-Tabela_Hydrotaea_vc_MuscaR$`%Surv.p.Md` <- as.numeric(Tabela_Hydrotaea_vc_MuscaR$`%Surv.p.Md` )
-Tabela_Hydrotaea_vc_MuscaR$Encontro <- factor(Tabela_Hydrotaea_vc_MuscaR$Encontro )
-Tabela_Hydrotaea_vc_MuscaR$NsurLarvaMd <- as.numeric(Tabela_Hydrotaea_vc_MuscaR$NsurLarvaMd)
-Tabela_Hydrotaea_vc_MuscaR$Prop <- as.numeric(Tabela_Hydrotaea_vc_MuscaR$Prop)
+#Modifies the list
+Species <- unlist(Specie) 
+#create data.frame 
+Specie <-as.data.frame(Species)
 
-glimpse(dados)
+dados3 <-data.frame(Survival = c( dados$NsurLarvaMd, dados$NsurLarvaHa), Density=
+                       c(dados$DensInMu, dados$DensInMu),Encounter =
+                       c(dados$Encontro, dados$Encontro), Species ) 
 
-#Plot da sobrevivencia larval
-Sur.larv.Md <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y=`%surv.larva.Md` , group=DensInMu))+ 
-  geom_boxplot(aes(fill=DensInMu))
-Sur.larv.Md <- Sur.larv.Md + facet_wrap(~ Encontro)
-Sur.larv.Md <- Sur.larv.Md + scale_y_log10()
+dados4 <- data.frame(Survival = NULL)
+dados5 <-data.frame(DevRate = (c( dados$taxa.larv.Md , dados$taxa.larv.Ha)), Density=
+                      c(dados$DensInMu, dados$DensInMu),Encounter =
+                      c(dados$Encontro, dados$Encontro), Species ) 
+dados6 <- data.frame(DevRate = (c( dados$taxa.p.Md , dados$taxa.p.Ha )), Density=
+                       c(dados$DensInMu, dados$DensInMu),Encounter =
+                       c(dados$Encontro, dados$Encontro), Species ) 
 
-#Plot da sobrevivencia pupal
-Sur.pup.Md <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y=`%Surv.p.Md` , group=DensInMu))+ 
-  geom_boxplot(aes(fill=DensInMu))
-Sur.pup.Md <- Sur.pup.Md + facet_wrap(~ Encontro)
+PSurvival <-data.frame(Psurvival = c(dados$NsurPupaMd/dados$NsurLarvaMd, dados$NsurPupaHa/dados$
+               NsurLarvaHa), Density=c(dados$DensInMu, dados$DensInMu),Encounter =
+                       c(dados$Encontro, dados$Encontro), Species)
 
-#Plot da capacidade predatoria
-Pred.cap.Hyd <- ggplot(Tabela_Hydrotaea_vc_MuscaR, aes(x=DensInMu, y= `Ndeath.larva.Md/N.Surv.Larv.Ha` , group=DensInMu))+ 
-  geom_boxplot(aes(fill=DensInMu))
-Pred.cap.Hyd <- Pred.cap.Hyd + facet_wrap(~ Encontro)
+DevRate <-  c( dados$taxa.larv.Md , dados$taxa.larv.Ha)
+Encounter <- unlist(c(dados$Encontro, dados$Encontro))
+Density <- unlist(c(dados$DensInMu, dados$DensInMu))
 
-#### Recorte geral do Grupo controle 
-control       <- slice(Tabela_Hydrotaea_vc_MuscaR, 61:69)
+Psurvival <- unlist(c(dados$NsurPupaMd/dados$NsurLarvaMd, dados$
+                 NsurPupaHa/dados$NsurLarvaHa))
 
-#teste de homogeneidade de variancias para sobrevivencia larval
-hom.var.surv.larv.Md <- bartlett.test(`%surv.larva.Md` ~ DensInMu, data = Tabela_Hydrotaea_vc_MuscaR)
-#teste de homogeneidade de variancias para sobrevivencia larval
-Levene.surv.larv.Md <- leveneTest(`%surv.larva.Md` ~ DensInMu, data = Tabela_Hydrotaea_vc_MuscaR)
-#P<0,05 = ao menos dois grupos possuem diferen?as 
-#significativas nas variancias
+dados4 <- data.frame(Survival = Psurvival, Encounter=Encounter, Density=
+                       Density, Species)
+rm(dados4)
+dados4$Survival=Psurvival
 
-#analise de outliers na variavel sobrevivencia larval
-require(mfx)
-logitor((NsurLarvaMd/DensInMu)~DensInMu+Encontro ,data=dados)
-#criar tabela para compara??o entre grupos
-#control1 + h1m1
-Sur.larv.Md.control1  <- Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "Control1", ]
-Sur.larv.h1m1.Md <-   Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "H1M1", ]
-Sur.larv.h1m1.Md <- bind_rows (Sur.larv.Md.control1 , Sur.larv.h1m1.Md)
+#save file
+write.csv(dados4, "dados4.csv")
+#find directory
+getwd()
+#check data
+glimpse(dados4)
 
-#control1 + h2m1
-Sur.larv.h2m1.Md <-   Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "H2M1", ]
-Sur.larv.h2m1.Md <- bind_rows (Sur.larv.Md.control1 , Sur.larv.h2m1.Md)
+Density<-data.frame(Density=c(dados$DensInMu, dados$DensInMu))
 
-#control1 + h3m1
-Sur.larv.h3m1.Md <-   Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "H3M1", ]
-Sur.larv.h3m1.Md <- bind_rows (Sur.larv.Md.control1 , Sur.larv.h3m1.Md)
+Encounter<-data.frame(Encounter =c(dados$Encontro, dados$Encontro))
 
-#control2 + h3m2
-Sur.larv.Md.control2  <- Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "Control2", ]
-Sur.larv.h3m2.Md <-   Tabela_Hydrotaea_vc_MuscaR[Tabela_Hydrotaea_vc_MuscaR$Encontro == "H3M2", ]
-Sur.larv.h3m2.Md <- bind_rows (Sur.larv.Md.control2 , Sur.larv.h3m2.Md)
+#adicionar ao df
+Specie <- dados(Specie)
+
+# M. domestica larval survival  model
+model1 <- glm((NsurLarvaMd/DensInMu)~log(Prop)*Encontro, family
+              =binomial, weights = DensInMu,data=dados)
+summary(model1)
+
+
+#overdispersion
+
+model.surv.larv.Md <- glm((NsurLarvaMd/DensInMu)~log(DensInMu)*Encontro, family
+              =quasibinomial, weights = DensInMu, data=dados)
+summary(model.surv.larv.Md)
+anova.surv.md <-anova(model.surv.larv.Md, test="Chi")
+
+# what I usually do for regression outputs:
+library(stargazer)
+stargazer(model.surv.larv.Md, model2P, model3PHa, model2Ha ,model2.cp,  type = "html", out ="survival.html")
+
+stargazer( model.tax.des.Md.quas.poi.log, model1.rate.ha,  type = "html", out ="development.html")
+
+stargazer(anova.surv.md,  type = "html", out ="surv Md.html")
+
+model2P <- glm((NsurPupaMd/NsurLarvaMd)~log(DensInMu)*Encontro, family=
+                 quasibinomial, weights =
+                 DensInMu, data=dados)
+summary(model2P)
+anova(model2P, test="Chi")
+
+hnp(model2, xlab = 'Percentil da N(0,1)', ylab = 'Resíduos', main = 'Gráfico Normal de Probabilidades')
+
+PCT.p.Md <- as.data.frame (exp(cbind(OR = coef(model2), confint(model2))))
+
+PCT.p.Md$interp = (PCT.p.Md$OR -1) *100
